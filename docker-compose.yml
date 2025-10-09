@@ -19,7 +19,7 @@ services:
       retries: 5
 
   redis:
-    image: redis/redis-stack:7
+    image: redis/redis-stack:7.2.0-v19
     container_name: redis
     restart: unless-stopped
     environment:
@@ -61,6 +61,20 @@ services:
       - ./portainer-init.sh:/init.sh:ro
     command: ["/bin/sh", "/init.sh"]
     restart: "no"
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    ports:
+      - "${DOZZLE_PORT}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   postgres_data:
