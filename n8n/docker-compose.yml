@@ -4,7 +4,7 @@ services:
     container_name: n8n
     restart: unless-stopped
     environment:
-      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL}
       GENERIC_TIMEZONE: ${N8N_TIMEZONE}
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: ${POSTGRES_HOST}
@@ -47,6 +47,7 @@ services:
       - --debug=true
       - --os=Chrome
       - --account-validation=false
+      - --webhook=${WHATSAPP_WEBHOOK}
     networks:
       - infra
 
