@@ -103,6 +103,7 @@ services:
 
 networks:
   infra:
+    name: infra
     driver: bridge
 
 volumes:
