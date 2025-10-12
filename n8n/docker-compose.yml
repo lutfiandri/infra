@@ -1,0 +1,61 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    environment:
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL}
+      GENERIC_TIMEZONE: ${N8N_TIMEZONE}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: ${POSTGRES_HOST}
+      DB_POSTGRESDB_PORT: ${POSTGRES_PORT}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_POSTGRESDB_DATABASE: ${N8N_POSTGRES_DB}
+    ports:
+      - "${N8N_PORT}:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - infra
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${N8N_PORT}/healthz",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  whatsapp:
+    image: ghcr.io/aldinokemal/go-whatsapp-web-multidevice
+    container_name: whatsapp
+    restart: unless-stopped
+    ports:
+      - "${WHATSAPP_PORT}:${WHATSAPP_PORT}"
+    volumes:
+      - whatsapp_data:/app/storages
+    command:
+      - rest
+      - --basic-auth=${WHATSAPP_USERNAME}:${WHATSAPP_PASSWORD}
+      - --port=${WHATSAPP_PORT}
+      - --debug=true
+      - --os=Chrome
+      - --account-validation=false
+    networks:
+      - infra
+
+networks:
+  infra:
+    external: true
+
+volumes:
+  n8n_data:
+    driver: local
+  whatsapp_data:
+    driver: local

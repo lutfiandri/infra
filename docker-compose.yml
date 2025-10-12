@@ -11,6 +11,8 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - infra
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -27,6 +29,8 @@ services:
       - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - infra
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
@@ -42,8 +46,18 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    networks:
+      - infra
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/api/status"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9000/api/status",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,6 +74,8 @@ services:
       - ./portainer-init.sh:/init.sh:ro
     command: ["/bin/sh", "/init.sh"]
     restart: "no"
+    networks:
+      - infra
 
   dozzle:
     image: amir20/dozzle:latest
@@ -69,11 +85,25 @@ services:
       - "${DOZZLE_PORT}:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - infra
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/healthz",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
+
+networks:
+  infra:
+    driver: bridge
 
 volumes:
   postgres_data:
