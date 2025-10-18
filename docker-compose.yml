@@ -101,6 +101,25 @@ services:
       timeout: 10s
       retries: 3
 
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD}
+    ports:
+      - "${MINIO_API_PORT}:9000" # API
+      - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}" # Console
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
 networks:
   infra:
     name: infra
@@ -112,4 +131,6 @@ volumes:
   redis_data:
     driver: local
   portainer_data:
+    driver: local
+  minio_data:
     driver: local
