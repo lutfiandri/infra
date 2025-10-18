@@ -113,6 +113,8 @@ services:
       - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}" # Console
     volumes:
       - minio_data:/data
+    networks:
+      - infra
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
